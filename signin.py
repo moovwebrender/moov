@@ -17,7 +17,7 @@ def dashboard():
 # =========================
 signup_url = "http://ec2-18-210-103-52.compute-1.amazonaws.com/mymoovbemobile/auth/signupByPhone"
 signin_url = "http://ec2-18-210-103-52.compute-1.amazonaws.com/mymoovbemobile/auth/signInByPhone"
-firebase_url = "https://moov-24948-default-rtdb.firebaseio.com/users"
+firebase_url = "https://moov-befcb-default-rtdb.firebaseio.com/"
 
 headers = {
     "User-Agent": "Dart/3.5 (dart:io)",
