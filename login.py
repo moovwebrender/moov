@@ -11,7 +11,7 @@ def home():
 # =========================
 # إعدادات Firebase
 # =========================
-firebase_url = "https://moov-24948-default-rtdb.firebaseio.com/users"
+firebase_url = "https://moov-befcb-default-rtdb.firebaseio.com/"
 
 # =========================
 # التحقق من البيانات
