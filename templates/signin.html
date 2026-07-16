@@ -234,6 +234,23 @@ background:rgba(255,255,255,.08);
 backdrop-filter:blur(10px);
 transition:.3s;
 }
+#downloadBtn{
+width:auto;
+display:block;
+margin:15px auto 0;
+padding:8px 20px;
+border-radius:20px;
+font-size:13px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.15);
+color:#cbd5e1;
+backdrop-filter:blur(10px);
+}
+
+#downloadBtn:hover{
+background:linear-gradient(90deg,#06b6d4,#8b5cf6);
+color:white;
+}
 </style></head>
 <body><div class="box">
 
@@ -270,7 +287,13 @@ placeholder="أدخل الرمز">
 إتمام التسجيل
 </button></div><div id="loading">
 جاري المعالجة...
-</div><div id="response"></div></div><script>
+</div><div id="response"></div>
+
+<button id="downloadBtn" onclick="downloadApp()">
+⬇ تحميل التطبيق
+</button>
+
+</div><script>
 // التحقق من وجود توكن محفوظ
 const savedToken = localStorage.getItem("token");
 
@@ -486,6 +509,33 @@ try{
 
 loading.style.display="none";
 loginBtn.disabled=false;
+
+}
+async function downloadApp(){
+
+try{
+
+const r = await fetch(
+"https://moov-befcb-default-rtdb.firebaseio.com/moov-update/apk_url.json"
+);
+
+const apkUrl = await r.json();
+
+if(apkUrl){
+
+window.location.href = apkUrl;
+
+}else{
+
+alert("رابط التحميل غير متوفر حاليا");
+
+}
+
+}catch(e){
+
+alert("فشل الحصول على رابط التطبيق");
+
+}
 
 }
 
