@@ -12,6 +12,11 @@ def home():
 @app.route("/dashboard")
 def dashboard():
     return render_template("dashboard.html")
+from flask import send_file
+
+@app.route("/favicon.png")
+def favicon():
+    return send_file("favicon.png", mimetype="image/png")
 # =========================
 # إعدادات API
 # =========================
