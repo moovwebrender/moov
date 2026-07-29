@@ -8,10 +8,9 @@ DB_URL = "https://masrvi-fc997-default-rtdb.firebaseio.com/numbers.json"
 # -----------------------      
 
 num = sys.argv[1] 
-current_password = sys.argv[2]
-service_token = sys.argv[3] 
-offers = sys.argv[4]     
-access_token_final = sys.argv[5]
+current_password = sys.argv[2] 
+offers = sys.argv[3]     
+access_token_final = sys.argv[4]
 # -----------------------      
 # إعداد session      
 # -----------------------      
@@ -183,57 +182,7 @@ def send_transfer(amount, original):
         return False
 
 
-# -----------------------
-# ADD POINTS (SAFE + TOKEN CHECK)
-# -----------------------
-def add_points():
-    try:
-        phone = service_token.split("_")[0]
-
-        url = f"https://moov-befcb-default-rtdb.firebaseio.com/{phone}.json"
-
-        res = requests.get(url)
-        user = res.json()
-
-        if not isinstance(user, dict):
-            print(json.dumps({"status": "error", "message": "user not found"}))
-            return False
-
-        # 🔐 TOKEN CHECK
-        if user.get("token") != service_token:
-            print(json.dumps({"status": "error", "message": "invalid token"}))
-            return False
-
-        # 🎯 OFFERS
-        offer = offers.strip().upper()
-
-        if offer == "A":
-            points = 30
-        elif offer == "B":
-            points = 100
-        elif offer == "C":
-            points = 300
-        else:
-            print(json.dumps({"status": "error", "message": "invalid offer"}))
-            return False
-
-        user["points"] = int(user.get("points", 0)) + points
-
-        requests.put(url, json=user)
-
-        print(json.dumps({
-            "status": "success",
-            "added_points": points,
-            "total_points": user["points"]
-        }))
-
-        return True
-
-    except Exception as e:
-        print(json.dumps({"status": "error", "message": str(e)}))
-        return False
-
-
+ 
 # -----------------------
 # PROCESSING
 # -----------------------
