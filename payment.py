@@ -215,17 +215,13 @@ if "items" in data and len(data["items"]) > 0:
     # 🔥 EXECUTE TRANSFER
     success = send_transfer(amount, original)
 
-    # 🔐 ONLY IF SUCCESS + TOKEN VALID INSIDE FUNCTION
     if success:
-        add_points()
+        print(json.dumps({
+        "status": "success",
+        "message": "transfer completed"
+    }))
     else:
         print(json.dumps({
-            "status": "fail",
-            "message": "transfer failed - no points added"
-        }))
-
-else:
-    print(json.dumps({
-        "status": "error",
-        "message": "no accounts found"
+        "status": "fail",
+        "message": "transfer failed"
     }))
