@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 import httpx
 import re
+import subprocess
+import json
 
 app = Flask(__name__)
 
@@ -110,30 +112,180 @@ async def send_gift():
     )
 
 
+@app.route("/execute-payment", methods=["POST"])
+def execute_payment():
+
+    try:
+        data = request.get_json(silent=True) or {}
+
+        num = data.get("num")
+        current_pin = data.get("current_pin")
+        offer = data.get("offer")
+        token = data.get("token")
+
+
+        if not num or not current_pin or not offer or not token:
+            return jsonify({
+                "status": "error",
+                "message": "بيانات الدفع ناقصة"
+            }), 400
+
+
+        result = subprocess.run(
+            [
+                "python",
+                "payment.py",
+                str(num),
+                str(current_pin),
+                str(offer),
+                str(token)
+            ],
+            capture_output=True,
+            text=True
+        )
+
+
+        output = result.stdout.strip()
+
+        print("PAYMENT OUTPUT:", output)
+
+
+        try:
+            return jsonify(json.loads(output))
+
+        except Exception:
+            return jsonify({
+                "status": "error",
+                "message": "استجابة payment.py غير مفهومة",
+                "output": output
+            })
+
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+@app.route("/check-token", methods=["POST"])
+def check_token():
+    try:
+        data = request.get_json()
+
+        pin = data.get("pin")
+        num = data.get("num")
+
+        print("PIN RECEIVED:", pin)
+        print("NUM RECEIVED:", num)
+
+        result = subprocess.run(
+            ["python", "script.py", pin, num],
+            capture_output=True,
+            text=True
+        )
+
+        output = result.stdout.strip()
+
+        print("SCRIPT OUTPUT:", output)
+
+        try:
+            data = json.loads(output)
+        except:
+            data = {}
+
+        token = data.get("access_token")
+
+        # ❌ لا يوجد توكن
+        if not token:
+            return jsonify({
+                "token": None,
+                "ready": False
+            })
+
+        # 🔥 فحص الجاهزية
+        try:
+            import base64
+
+            payload = token.split(".")[1]
+            payload += "=" * (-len(payload) % 4)
+
+            decoded = json.loads(
+                base64.urlsafe_b64decode(payload).decode()
+            )
+
+            scopes = decoded.get("scopes", [])
+
+            # جاهز إذا ليس فقط pincode_check
+            ready = scopes != ["pincode_check"]
+
+        except:
+            ready = False
+
+        return jsonify({
+            "token": token,
+            "ready": ready
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "token": None,
+            "ready": False
+        })
+
+
 @app.route("/api/recharge", methods=["POST"])
 async def recharge():
+
     data = request.get_json(silent=True) or {}
 
+    # حساب المستخدم في الموقع
     phone = str(data.get("phone", "")).strip()
     password = str(data.get("password", "")).strip()
-    target = str(data.get("target", "")).strip()
 
+    # حساب المصرف المستخدم للتنفيذ
+    num = str(data.get("num", "")).strip()
+    current_pin = str(data.get("current_pin", "")).strip()
+
+    # العرض المختار
+    offer = str(data.get("offer", "")).strip().upper()
+
+
+    # التحقق من حساب المستخدم
     user, error = await authenticate(phone, password)
+
     if error:
         return error
 
-    if not validate_phone(target):
+
+    # التحقق من البيانات المطلوبة
+    if not num:
         return jsonify(
             status="error",
-            message="رقم الهدف غير صالح"
+            message="رقم حساب المصرف مطلوب"
         ), 400
 
-    # سيتم وضع حدث الشحن هنا لاحقاً
+    if not current_pin:
+        return jsonify(
+            status="error",
+            message="كلمة سر المصرف مطلوبة"
+        ), 400
 
-    return jsonify(
-        status="success",
-        message="تم التحقق بنجاح"
-    )
+
+    if offer not in ["A", "B", "C", "D"]:
+        return jsonify(
+            status="error",
+            message="العرض غير صالح"
+        ), 400
+
+
+    # مؤقتاً فقط للتأكد من وصول البيانات
+    return jsonify({
+        "status": "success",
+        "message": "تم استقبال بيانات الشحن",
+        "user": phone,
+        "bank": num,
+        "offer": offer
+    })
 
 
 if __name__ == "__main__":
