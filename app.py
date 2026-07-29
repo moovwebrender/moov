@@ -270,50 +270,150 @@ async def recharge():
     phone = str(data.get("phone", "")).strip()
     password = str(data.get("password", "")).strip()
 
-    # حساب المصرف المستخدم للتنفيذ
-    num = str(data.get("num", "")).strip()
-    current_pin = str(data.get("current_pin", "")).strip()
+    # رقم الحساب البنكي المخزن
+    num = phone
 
-    # العرض المختار
+    # كلمة السر البنكية المخزنة
+    current_pin = password
+
+    # رقم المستلم
+    target = str(data.get("target", "")).strip()
+
+    # العرض
     offer = str(data.get("offer", "")).strip().upper()
 
 
-    # التحقق من حساب المستخدم
+    # التحقق من المستخدم
     user, error = await authenticate(phone, password)
 
     if error:
         return error
 
 
-    # التحقق من البيانات المطلوبة
-    if not num:
-        return jsonify(
-            status="error",
-            message="رقم حساب المصرف مطلوب"
-        ), 400
-
-    if not current_pin:
-        return jsonify(
-            status="error",
-            message="كلمة سر المصرف مطلوبة"
-        ), 400
+    if not validate_phone(target):
+        return jsonify({
+            "status": "error",
+            "message": "رقم المستلم غير صالح"
+        }),400
 
 
-    if offer not in ["A", "B", "C", "D"]:
-        return jsonify(
-            status="error",
-            message="العرض غير صالح"
-        ), 400
+    if offer not in ["A","B","C","D"]:
+        return jsonify({
+            "status":"error",
+            "message":"العرض غير صالح"
+        }),400
 
 
-    # مؤقتاً فقط للتأكد من وصول البيانات
-    return jsonify({
-        "status": "success",
-        "message": "تم استقبال بيانات الشحن",
-        "user": phone,
-        "bank": num,
-        "offer": offer
-    })
+    try:
+
+        # تشغيل عملية الشحن
+        result = subprocess.run(
+            [
+                "python",
+                "offer.py",
+                target,
+                offer
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
+
+        output = result.stdout.strip()
+
+        print("OFFER RESULT:",output)
+
+
+        try:
+            response = json.loads(output)
+
+        except:
+            return jsonify({
+                "status":"error",
+                "message":"استجابة الشحن غير مفهومة",
+                "details":output
+            })
+
+
+        # فشل إرسال الرصيد
+        if response.get("status") != "success":
+
+            return jsonify({
+                "status":"failed",
+                "message":"فشل إرسال الرصيد",
+                "details":response
+            })
+
+
+        # هنا فقط يتم تنفيذ الخصم
+        payment = subprocess.run(
+            [
+                "python",
+                "payment.py",
+                num,
+                current_pin,
+                offer,
+                ""
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
+
+        payment_output = payment.stdout.strip()
+
+        print("PAYMENT RESULT:",payment_output)
+
+
+        try:
+            payment_json=json.loads(payment_output)
+
+        except:
+            return jsonify({
+                "status":"warning",
+                "message":"تم إرسال الرصيد لكن نتيجة الخصم غير واضحة",
+                "details":payment_output
+            })
+
+
+        # نجاح كل شيء
+        if payment_json.get("status")=="success":
+
+            return jsonify({
+                "status":"success",
+                "message":"تمت العملية بنجاح",
+                "recharge":"تم إرسال الرصيد",
+                "payment":"تم خصم القيمة"
+            })
+
+
+        # إرسال الرصيد نجح لكن الخصم فشل
+        return jsonify({
+            "status":"partial",
+            "message":"تم إرسال الرصيد لكن فشل الخصم",
+            "recharge":"نجح",
+            "payment":"فشل",
+            "details":payment_json,
+            "note":"تم تسجيل المستحقات"
+        })
+
+
+    except subprocess.TimeoutExpired:
+
+        return jsonify({
+            "status":"error",
+            "message":"انتهت مهلة تنفيذ العملية"
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+            "status":"error",
+            "message":str(e)
+        })
 
 
 if __name__ == "__main__":
