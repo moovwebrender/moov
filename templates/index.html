@@ -6,18 +6,69 @@
 <title>Moov</title>
 
 <style>
-body{margin:0;font-family:tahoma;background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.box{width:95%;max-width:480px;background:#1e293b;padding:20px;border-radius:16px}
+body{
+margin:0;
+font-family:tahoma;
+background:#0f172a;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh
+}
+
+.box{
+width:95%;
+max-width:480px;
+background:#1e293b;
+padding:20px;
+border-radius:16px
+}
+
 .hidden{display:none}
-input,button,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:0}
-.btn{background:#06b6d4;color:#fff}
-.top{display:flex;gap:8px}
-.card{flex:1;background:#334155;padding:10px;border-radius:10px;text-align:center}
-.modal{display:none;position:fixed;inset:0;background:#0008;justify-content:center;align-items:center}
-.m{background:#1e293b;padding:16px;border-radius:12px;width:90%;max-width:320px;text-align:center}
+
+input,button,select{
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:10px;
+border:0
+}
+
+.btn{
+background:#06b6d4;
+color:white
+}
+
+.card{
+background:#334155;
+padding:10px;
+border-radius:10px;
+text-align:center;
+margin-bottom:10px
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:#0008;
+justify-content:center;
+align-items:center
+}
+
+.m{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+width:90%;
+max-width:320px;
+text-align:center
+}
 </style>
 
 </head>
+
 <body>
 
 <div class="box">
@@ -37,50 +88,52 @@ input,button,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;bord
 
 <div id="dash" class="hidden">
 
-<div class="top">
 
 <div class="card">
-<button disabled>سحب أموالي</button>
+<div>أموالي</div>
 <div id="my_money">0</div>
 </div>
+
 
 <div class="card">
 <div>مجموع الأموال</div>
 <div id="total_money">0</div>
 </div>
 
+
 <div class="card">
-<button disabled>الهدايا</button>
+<div>الهدايا</div>
 <div id="gifts">0</div>
 </div>
 
-</div>
 
 <hr>
 
 
-<h4>عملية الشحن</h4>
-
-<input id="target" maxlength="8" placeholder="رقم المستفيد">
-
-
-<input id="bank" maxlength="8" placeholder="رقم الحساب البنكي">
-
-
-<input id="bankpin" maxlength="4" placeholder="كلمة سر الحساب البنكي">
+<input id="target" maxlength="8" placeholder="رقم المستلم">
 
 
 <select id="offer">
-
 <option value="A">العرض A</option>
 <option value="B">العرض B</option>
 <option value="C">العرض C</option>
 <option value="D">العرض D</option>
-
 </select>
 
 
-<button class="btn" onclick="recharge()">شحن</button>
+<button id="rechargeBtn" class="btn" onclick="recharge()">
+شحن
+</button>
+
+
+<button disabled>
+السحب غير متاح حاليا
+</button>
+
+
+<button disabled>
+الهدايا غير متاحة حاليا
+</button>
 
 
 </div>
@@ -89,6 +142,7 @@ input,button,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;bord
 
 
 <div id="result" class="modal">
+
 <div class="m">
 
 <h3 id="resultTitle"></h3>
@@ -100,27 +154,23 @@ input,button,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;bord
 </button>
 
 </div>
+
 </div>
+
 
 
 <script>
 
+
 const ok=p=>/^[234]\d{7}$/.test(p);
-
-
-function showResult(title,text){
-
-resultTitle.textContent=title;
-resultText.textContent=text;
-result.style.display="flex";
-
-}
 
 
 function logged(){
 
-return localStorage.getItem("phone") &&
-localStorage.getItem("password");
+return !!(
+localStorage.getItem("phone") &&
+localStorage.getItem("password")
+);
 
 }
 
@@ -128,8 +178,10 @@ localStorage.getItem("password");
 
 async function login(){
 
-let p=phone.value.trim();
-let pw=password.value.trim();
+
+let p=document.getElementById("phone").value.trim();
+
+let pw=document.getElementById("password").value.trim();
 
 
 if(!ok(p)||!/^[0-9]{4}$/.test(pw)){
@@ -161,28 +213,30 @@ password:pw
 let d=await r.json();
 
 
-
 if(d.status!="success"){
 
-msg.textContent=d.message||"فشل الدخول";
+msg.textContent=d.message||"فشل";
+
 return;
 
 }
 
 
 
+// حفظ كل البيانات القادمة
+
 localStorage.clear();
 
 
 Object.keys(d).forEach(k=>{
 
-if(k!="status"){
-
 localStorage.setItem(k,d[k]);
 
-}
-
 });
+
+
+localStorage.setItem("phone",p);
+localStorage.setItem("password",pw);
 
 
 
@@ -192,12 +246,9 @@ gifts.textContent=d.gifts||0;
 
 
 
-loginDiv=document.getElementById("login");
-dashDiv=document.getElementById("dash");
+document.getElementById("login").classList.add("hidden");
 
-
-loginDiv.classList.add("hidden");
-dashDiv.classList.remove("hidden");
+document.getElementById("dash").classList.remove("hidden");
 
 
 }
@@ -210,9 +261,22 @@ async function recharge(){
 if(!logged()){
 
 alert("يجب تسجيل الدخول");
+
 return;
 
 }
+
+
+
+let btn=document.getElementById("rechargeBtn");
+
+btn.disabled=true;
+
+btn.textContent="جاري المعالجة...";
+
+
+
+try{
 
 
 let r=await fetch("/api/recharge",{
@@ -223,47 +287,89 @@ headers:{
 "Content-Type":"application/json"
 },
 
+
 body:JSON.stringify({
 
 phone:localStorage.getItem("phone"),
 
 password:localStorage.getItem("password"),
 
-num:bank.value.trim(),
 
-current_pin:bankpin.value.trim(),
+// حساب البنك المخزن
 
-offer:offer.value,
+num:localStorage.getItem("phone"),
 
-target:target.value.trim()
+current_pin:localStorage.getItem("password"),
+
+
+
+// الرقم المراد شحنه
+
+target:
+document.getElementById("target").value.trim(),
+
+
+// العرض
+
+offer:
+document.getElementById("offer").value
+
 
 })
 
 });
 
 
+
 let d=await r.json();
 
 
 
+result.style.display="flex";
+
+
 if(d.status=="success"){
 
-showResult(
-"تم بنجاح",
-"تم إرسال طلب الشحن بنجاح"
-);
+resultTitle.textContent="تمت العملية";
+
+resultText.textContent=
+"تم إرسال طلب الشحن بنجاح";
 
 }else{
 
-showResult(
-"فشل",
-d.message||"حدث خطأ أثناء العملية"
-);
+resultTitle.textContent="فشل العملية";
+
+resultText.textContent=
+d.message || "حدث خطأ";
+
+
+}
+
+
+
+}
+
+catch(e){
+
+
+result.style.display="flex";
+
+resultTitle.textContent="خطأ";
+
+resultText.textContent=e.message;
+
 
 }
 
 
+btn.disabled=false;
+
+btn.textContent="شحن";
+
+
 }
+
+
 
 </script>
 
