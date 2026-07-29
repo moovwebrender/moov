@@ -117,21 +117,53 @@ def execute_payment():
 
     try:
         data = request.get_json(silent=True) or {}
-
+        phone = data.get("phone")
         num = data.get("num")
         current_pin = data.get("current_pin")
         offer = data.get("offer")
         token = data.get("token")
 
-
-        if not num or not current_pin or not offer or not token:
+        if not phone or not num or not current_pin or not offer or not token:
             return jsonify({
                 "status": "error",
                 "message": "بيانات الدفع ناقصة"
             }), 400
 
+        # ==========================
+        # أولاً: تنفيذ العرض
+        # ==========================
+        offer_result = subprocess.run(
+            [
+                "python",
+                "offer.py",
+                str(phone),
+                str(offer)
+            ],
+            capture_output=True,
+            text=True
+        )
 
-        result = subprocess.run(
+        offer_output = offer_result.stdout.strip()
+
+        print("OFFER OUTPUT:", offer_output)
+
+        try:
+            offer_json = json.loads(offer_output)
+        except Exception:
+            return jsonify({
+                "status": "error",
+                "message": "استجابة offer.py غير مفهومة",
+                "output": offer_output
+            })
+
+        # إذا فشل العرض لا يتم الخصم
+        if offer_json.get("status") != "success":
+            return jsonify(offer_json)
+
+        # ==========================
+        # ثانياً: تنفيذ الخصم
+        # ==========================
+        payment_result = subprocess.run(
             [
                 "python",
                 "payment.py",
@@ -144,22 +176,18 @@ def execute_payment():
             text=True
         )
 
+        payment_output = payment_result.stdout.strip()
 
-        output = result.stdout.strip()
-
-        print("PAYMENT OUTPUT:", output)
-
+        print("PAYMENT OUTPUT:", payment_output)
 
         try:
-            return jsonify(json.loads(output))
-
+            return jsonify(json.loads(payment_output))
         except Exception:
             return jsonify({
                 "status": "error",
                 "message": "استجابة payment.py غير مفهومة",
-                "output": output
+                "output": payment_output
             })
-
 
     except Exception as e:
         return jsonify({
@@ -293,4 +321,4 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
-    )
+                )
