@@ -1,3 +1,4 @@
 Flask[async]
 httpx
 gunicorn
+requests
