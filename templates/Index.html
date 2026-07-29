@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moov</title>
+
+<style>
+body{margin:0;font-family:tahoma;background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.box{width:95%;max-width:480px;background:#1e293b;padding:20px;border-radius:16px}
+.hidden{display:none}
+input,button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:0}
+.btn{background:#06b6d4;color:#fff}
+.top{display:flex;gap:8px}
+.card{flex:1;background:#334155;padding:10px;border-radius:10px;text-align:center}
+.card button{margin:0 0 6px 0}
+.modal{display:none;position:fixed;inset:0;background:#0008;justify-content:center;align-items:center}
+.m{background:#1e293b;padding:16px;border-radius:12px;width:90%;max-width:320px}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<div id="login">
+
+<input id="phone" maxlength="8" placeholder="2xxxxxxx / 3xxxxxxx / 4xxxxxxx">
+
+<input id="password" type="password" maxlength="4" placeholder="كلمة المرور">
+
+<button class="btn" onclick="login()">تسجيل الدخول</button>
+
+<div id="msg"></div>
+
+</div>
+
+<div id="dash" class="hidden">
+
+<div class="top">
+
+<div class="card">
+<button class="btn" onclick="withdraw()">سحب أموالي</button>
+<div id="my_money">0</div>
+</div>
+
+<div class="card">
+<div>مجموع الأموال اليوم</div>
+<div id="total_money">0</div>
+</div>
+
+<div class="card">
+<button class="btn" onclick="gift.style.display='flex'">الهدايا</button>
+<div id="gifts">0</div>
+</div>
+
+</div>
+
+<hr>
+
+<input id="target" maxlength="8" placeholder="رقم الهاتف">
+
+<button class="btn" onclick="recharge()">شحن</button>
+
+</div>
+
+</div>
+
+<div id="gift" class="modal">
+<div class="m">
+
+<input id="giftPhone" maxlength="8" placeholder="رقم المستلم">
+
+<button class="btn" onclick="sendGift()">إرسال</button>
+
+<button onclick="gift.style.display='none'">إغلاق</button>
+
+</div>
+</div>
+
+<script>
+
+const ok=p=>/^[234]\d{7}$/.test(p);
+
+function logged(){
+    return localStorage.getItem("phone") &&
+           localStorage.getItem("password");
+}
+
+async function login(){
+
+let p=phone.value.trim(),
+    pw=password.value.trim();
+
+if(!ok(p)||!/^[0-9]{4}$/.test(pw)){
+    msg.textContent="بيانات غير صحيحة";
+    return;
+}
+
+let r=await fetch("/api/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+phone:p,
+password:pw
+})
+});
+
+let d=await r.json();
+
+if(d.status!="success"){
+msg.textContent=d.message||"فشل";
+return;
+}
+
+[
+"phone",
+"password",
+"my_money",
+"total_money",
+"gifts",
+"admin_phone",
+"admin_password"
+].forEach(k=>localStorage.removeItem(k));
+
+localStorage.setItem("phone",p);
+localStorage.setItem("password",pw);
+
+[
+"my_money",
+"total_money",
+"gifts",
+"admin_phone",
+"admin_password"
+].forEach(k=>localStorage.setItem(k,d[k]));
+
+my_money.textContent=d.my_money;
+total_money.textContent=d.total_money;
+gifts.textContent=d.gifts;
+
+login.classList.add("hidden");
+dash.classList.remove("hidden");
+
+}
+
+async function withdraw(){
+
+if(!logged()){
+alert("يجب تسجيل الدخول");
+return;
+}
+
+let r=await fetch("/api/withdraw",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+phone:localStorage.getItem("phone"),
+password:localStorage.getItem("password")
+})
+});
+
+let d=await r.json();
+
+alert(d.message);
+
+}
+
+async function recharge(){
+
+if(!logged()){
+alert("يجب تسجيل الدخول");
+return;
+}
+
+let r=await fetch("/api/recharge",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+phone:localStorage.getItem("phone"),
+password:localStorage.getItem("password"),
+target:target.value.trim()
+})
+});
+
+let d=await r.json();
+
+alert(d.message);
+
+}
+
+async function sendGift(){
+
+if(!logged()){
+alert("يجب تسجيل الدخول");
+return;
+}
+
+let r=await fetch("/api/send_gift",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+phone:localStorage.getItem("phone"),
+password:localStorage.getItem("password"),
+receiver:giftPhone.value.trim()
+})
+});
+
+let d=await r.json();
+
+alert(d.message);
+
+if(d.status=="success"){
+gift.style.display="none";
+}
+
+}
+
+</script>
+
+</body>
+</html>
