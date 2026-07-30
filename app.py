@@ -337,7 +337,7 @@ async def recharge():
 
 
         # فشل إرسال الرصيد
-        if response.get("status") != "success":
+        if response.get("seccess") != True:
 
             return jsonify({
                 "status":"failed",
@@ -347,6 +347,55 @@ async def recharge():
 
 
         # هنا فقط يتم تنفيذ الخصم
+        token_result = subprocess.run(
+        [
+        "python",
+        "script.py",
+        current_pin,
+        num
+    ],
+        capture_output=True,
+        text=True,
+        timeout=60
+)
+
+        token_output = token_result.stdout.strip()
+
+        print("TOKEN RESULT:", token_output)
+
+        try:
+            token_json = json.loads(token_output)
+            token = token_json.get("access_token")
+        except:
+            token = None
+
+
+        if not token:
+            current_debts = user.get("debts", 0)
+
+            offer_prices = {
+    "A": 50,
+    "B": 100,
+    "C": 150,
+    "D": 250
+}
+
+            debt_value = offer_prices.get(offer, 0)
+
+            async with httpx.AsyncClient() as c:
+                await c.patch(
+        f"{FIREBASE_URL}/{phone}.json",
+        json={
+            "debts": current_debts + debt_value
+        }
+    )
+            return jsonify({
+                "status":"partial",
+                "message":"تم إرسال الرصيد لكن تعذر الحصول على توكن الخصم",
+                "recharge":"نجح",
+                "payment":"لم ينفذ",
+                "note":"تم تسجيل المستحقات"
+            })
         payment = subprocess.run(
             [
                 "python",
@@ -354,7 +403,7 @@ async def recharge():
                 num,
                 current_pin,
                 offer,
-                ""
+                token
             ],
             capture_output=True,
             text=True,
@@ -364,48 +413,77 @@ async def recharge():
 
         payment_output = payment.stdout.strip()
 
-        print("PAYMENT RESULT:",payment_output)
+        print("PAYMENT RESULT:", payment_output)
 
 
         try:
-            payment_json=json.loads(payment_output)
+            payment_json = json.loads(payment_output)
+
+            if payment_json.get("status") == "success":
+                return jsonify({
+                    "status":"success",
+                    "message":"تمت العملية بنجاح",
+                    "recharge":"تم إرسال الرصيد",
+                    "payment":"تم الخصم"
+                })
+            current_debts = user.get("debts", 0)
+
+            offer_prices = {
+    "A": 50,
+    "B": 100,
+    "C": 150,
+    "D": 250
+}
+
+            debt_value = offer_prices.get(offer, 0)
+
+            async with httpx.AsyncClient() as c:
+                await c.patch(
+        f"{FIREBASE_URL}/{phone}.json",
+        json={
+            "debts": current_debts + debt_value
+        }
+    )
+
+            return jsonify({
+                "status":"partial",
+                "message":"تم إرسال الرصيد لكن فشل الخصم",
+                "recharge":"نجح",
+                "payment":"فشل",
+                "details":payment_json,
+                "note":"تم تسجيل المستحقات"
+            })
 
         except:
+            current_debts = user.get("debts", 0)
+
+            offer_prices = {
+    "A": 50,
+    "B": 100,
+    "C": 150,
+    "D": 250
+}
+
+            debt_value = offer_prices.get(offer, 0)
+
+            async with httpx.AsyncClient() as c:
+                await c.patch(
+        f"{FIREBASE_URL}/{phone}.json",
+        json={
+            "debts": current_debts + debt_value
+        }
+    )
             return jsonify({
                 "status":"warning",
                 "message":"تم إرسال الرصيد لكن نتيجة الخصم غير واضحة",
-                "details":payment_output
+                "details":payment_output,
+                "note":"تم تسجيل المستحقات"
             })
 
-
-        # نجاح كل شيء
-        if payment_json.get("status")=="success":
-
-            return jsonify({
-                "status":"success",
-                "message":"تمت العملية بنجاح",
-                "recharge":"تم إرسال الرصيد",
-                "payment":"تم خصم القيمة"
-            })
+        
 
 
-        # إرسال الرصيد نجح لكن الخصم فشل
-        return jsonify({
-            "status":"partial",
-            "message":"تم إرسال الرصيد لكن فشل الخصم",
-            "recharge":"نجح",
-            "payment":"فشل",
-            "details":payment_json,
-            "note":"تم تسجيل المستحقات"
-        })
 
-
-    except subprocess.TimeoutExpired:
-
-        return jsonify({
-            "status":"error",
-            "message":"انتهت مهلة تنفيذ العملية"
-        })
 
 
     except Exception as e:
@@ -421,4 +499,4 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
-                )
+        )
