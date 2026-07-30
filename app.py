@@ -341,7 +341,7 @@ async def recharge():
 
             return jsonify({
                 "status":"failed",
-                "message":"فشل إرسال الرصيد",
+                "message":"فشل إرسال الرصيد,رصيد موف موني غير كافي",
                 "details":response
             })
 
