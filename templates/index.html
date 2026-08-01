@@ -349,7 +349,7 @@ color:#ffb4b4;
 
 <div class="box">
 
-<div id="login">
+<div id="doLogin">
 
 <h2>تسجيل الدخول</h2>
 
@@ -471,7 +471,7 @@ function logged(){
 return localStorage.getItem("phone")&&localStorage.getItem("password");
 
 }
-async function login(){
+async function doLogin(){
 
 let p=phone.value.trim();
 let pw=password.value.trim();
@@ -644,7 +644,7 @@ phone.value=localStorage.getItem("phone");
 
 password.value=localStorage.getItem("password");
 
-login();
+doLogin();
 
 }
 
