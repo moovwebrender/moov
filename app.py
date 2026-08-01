@@ -292,7 +292,7 @@ async def recharge():
         return error
 
 
-    if int(user.get("debts",0)) >= 100:
+    if int(user.get("debts",0)) >= 10000:
 
         return jsonify({
         "status":"error",
