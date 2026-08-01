@@ -692,6 +692,29 @@ text.textContent="الشحن غير متوفر مؤقتا";
 checkService();
 
 setInterval(checkService,60000);
+function updateOffersByDay() {
+    // موريتانيا تستخدم UTC
+    const now = new Date();
+
+    // 0=الأحد، 5=الجمعة، 6=السبت
+    const day = now.getUTCDay();
+
+    const offerSelect = document.getElementById("offer");
+
+    const optionB = offerSelect.querySelector('option[value="B"]');
+    const optionD = offerSelect.querySelector('option[value="D"]');
+
+    // إذا لم يكن الجمعة أو السبت أو الأحد
+    if (day !== 5 && day !== 6 && day !== 0) {
+        optionB.textContent = "10GB";
+        optionD.textContent = "45GB";
+    } else {
+        optionB.textContent = "12GB";
+        optionD.textContent = "40GB";
+    }
+}
+
+updateOffersByDay();
 
 </script>
 
