@@ -1,70 +1,346 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Moov</title>
 
 <style>
-body{
+
+*{
 margin:0;
+padding:0;
+box-sizing:border-box;
 font-family:tahoma;
-background:#0f172a;
-color:#fff;
+transition:.25s;
+}
+
+body{
+min-height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-min-height:100vh
+padding:20px;
+background:
+linear-gradient(135deg,#071225,#13253d,#0b1627);
+color:#fff;
+overflow:hidden;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:300px;
+height:300px;
+border-radius:50%;
+background:#00bcd455;
+top:-120px;
+left:-120px;
+filter:blur(80px);
+}
+
+body::after{
+content:"";
+position:fixed;
+width:260px;
+height:260px;
+border-radius:50%;
+background:#3b82f655;
+bottom:-100px;
+right:-100px;
+filter:blur(80px);
 }
 
 .box{
-width:95%;
-max-width:480px;
-background:#1e293b;
-padding:20px;
-border-radius:16px
+
+width:100%;
+max-width:430px;
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.13);
+
+backdrop-filter:blur(18px);
+
+-webkit-backdrop-filter:blur(18px);
+
+border-radius:28px;
+
+padding:22px;
+
+box-shadow:0 20px 45px rgba(0,0,0,.35);
+
+animation:show .4s;
+
 }
 
-.hidden{display:none}
+@keyframes show{
 
-input,button,select{
+from{
+
+opacity:0;
+
+transform:scale(.95);
+
+}
+
+to{
+
+opacity:1;
+
+transform:scale(1);
+
+}
+
+}
+
+.hidden{
+display:none;
+}
+
+h2{
+text-align:center;
+margin-bottom:18px;
+font-weight:normal;
+}
+
+input,select,button{
+
 width:100%;
-padding:12px;
-margin:8px 0;
-border-radius:10px;
-border:0
+
+border:none;
+
+outline:none;
+
+padding:14px;
+
+margin-top:12px;
+
+border-radius:15px;
+
+font-size:15px;
+
+}
+
+input,
+select{
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.1);
+
+color:#fff;
+
+}
+
+input::placeholder{
+
+color:#ddd;
+
+}
+
+option{
+
+color:#000;
+
 }
 
 .btn{
-background:#06b6d4;
-color:white
+
+background:#00bcd4;
+
+color:#fff;
+
+font-size:16px;
+
+cursor:pointer;
+
+}
+
+.btn:active{
+
+transform:scale(.97);
+
+}
+
+button:disabled{
+
+background:#ffffff15;
+
+color:#bbb;
+
+cursor:not-allowed;
+
+}
+
+.stats{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:12px;
+
+margin-bottom:18px;
+
 }
 
 .card{
-background:#334155;
-padding:10px;
-border-radius:10px;
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.12);
+
+border-radius:18px;
+
+padding:15px;
+
 text-align:center;
-margin-bottom:10px
+
+backdrop-filter:blur(12px);
+
+}
+
+.card div:first-child{
+
+font-size:13px;
+
+opacity:.8;
+
+margin-bottom:8px;
+
+}
+
+.card div:last-child{
+
+font-size:20px;
+
+font-weight:bold;
+
+}
+
+.phoneBox{
+
+position:relative;
+
+margin-top:12px;
+
+}
+
+.phoneBox input{
+
+margin:0;
+
+padding-left:42px;
+
+}
+
+.clearBtn{
+
+position:absolute;
+
+left:8px;
+
+top:50%;
+
+transform:translateY(-50%);
+
+width:28px;
+
+height:28px;
+
+border-radius:50%;
+
+background:rgba(255,255,255,.12);
+
+color:white;
+
+font-size:18px;
+
+padding:0;
+
+margin:0;
+
 }
 
 .modal{
+
 display:none;
+
 position:fixed;
+
 inset:0;
-background:#0008;
+
 justify-content:center;
-align-items:center
+
+align-items:center;
+
+background:rgba(0,0,0,.45);
+
+backdrop-filter:blur(8px);
+
 }
 
 .m{
-background:#1e293b;
-padding:20px;
-border-radius:12px;
+
 width:90%;
+
 max-width:320px;
-text-align:center
+
+padding:24px;
+
+background:rgba(255,255,255,.08);
+
+border:1px solid rgba(255,255,255,.15);
+
+border-radius:24px;
+
+backdrop-filter:blur(18px);
+
+text-align:center;
+
 }
+
+.loader{
+
+width:50px;
+
+height:50px;
+
+margin:10px auto 15px;
+
+border:4px solid rgba(255,255,255,.2);
+
+border-top:4px solid #00d4ff;
+
+border-radius:50%;
+
+animation:spin .8s linear infinite;
+
+}
+
+@keyframes spin{
+
+to{
+
+transform:rotate(360deg);
+
+}
+
+}
+
+#msg{
+
+margin-top:15px;
+
+text-align:center;
+
+color:#ffb4b4;
+
+}
+
 </style>
 
 </head>
@@ -75,122 +351,139 @@ text-align:center
 
 <div id="login">
 
+<h2>تسجيل الدخول</h2>
+
 <input id="phone" maxlength="8" placeholder="رقم الهاتف">
 
 <input id="password" type="password" maxlength="4" placeholder="كلمة المرور">
 
-<button class="btn" onclick="login()">تسجيل الدخول</button>
+<button class="btn" onclick="login()">
+تسجيل الدخول
+</button>
 
 <div id="msg"></div>
 
 </div>
 
-
 <div id="dash" class="hidden">
 
+<div class="stats">
 
 <div class="card">
 <div>أموالي</div>
 <div id="my_money">0</div>
 </div>
 
-
 <div class="card">
 <div>مجموع الأموال</div>
 <div id="total_money">0</div>
 </div>
 
-
-<div class="card">
+<div class="card" style="grid-column:1/3">
 <div>الهدايا</div>
 <div id="gifts">0</div>
 </div>
 
+</div>
 
-<hr>
+<div class="phoneBox">
 
+<button
+type="button"
+class="clearBtn"
+onclick="target.value=''">
+×
+</button>
 
-<input id="target" maxlength="8" placeholder="رقم المستلم">
+<input
+id="target"
+maxlength="8"
+placeholder="رقم المستلم">
 
+</div>
 
 <select id="offer">
+
 <option value="A">العرض A</option>
+
 <option value="B">العرض B</option>
+
 <option value="C">العرض C</option>
+
 <option value="D">العرض D</option>
+
 </select>
 
+<button
+id="rechargeBtn"
+class="btn"
+onclick="recharge()">
 
-<button id="rechargeBtn" class="btn" onclick="recharge()">
 شحن
+
 </button>
 
-
 <button disabled>
+
 السحب غير متاح حاليا
-</button>
 
+</button>
 
 <button disabled>
+
 الهدايا غير متاحة حاليا
+
 </button>
 
-
 </div>
 
 </div>
 
-
-<div id="result" class="modal">
+<div
+id="result"
+class="modal">
 
 <div class="m">
 
 <h3 id="resultTitle"></h3>
 
-<p id="resultText"></p>
+<div id="resultText"></div>
 
-<button onclick="result.style.display='none'">
+<button
+class="btn"
+style="margin-top:20px"
+onclick="result.style.display='none'">
+
 إغلاق
+
 </button>
 
 </div>
 
 </div>
 
-
-
 <script>
-
 
 const ok=p=>/^[234]\d{7}$/.test(p);
 
-
 function logged(){
 
-return !!(
-localStorage.getItem("phone") &&
-localStorage.getItem("password")
-);
+return localStorage.getItem("phone")&&localStorage.getItem("password");
 
 }
-
-
-
 async function login(){
 
+let p=phone.value.trim();
+let pw=password.value.trim();
 
-let p=document.getElementById("phone").value.trim();
-
-let pw=document.getElementById("password").value.trim();
-
+msg.textContent="";
 
 if(!ok(p)||!/^[0-9]{4}$/.test(pw)){
-
 msg.textContent="بيانات غير صحيحة";
 return;
-
 }
 
+try{
 
 let r=await fetch("/api/login",{
 
@@ -201,32 +494,29 @@ headers:{
 },
 
 body:JSON.stringify({
-
 phone:p,
 password:pw
-
 })
 
 });
 
-
 let d=await r.json();
-
 
 if(d.status!="success"){
 
-msg.textContent=d.message||"فشل";
+msg.textContent=d.message||"فشل تسجيل الدخول";
+
+localStorage.removeItem("phone");
+localStorage.removeItem("password");
+
+login.classList.remove("hidden");
+dash.classList.add("hidden");
 
 return;
 
 }
 
-
-
-// حفظ كل البيانات القادمة
-
 localStorage.clear();
-
 
 Object.keys(d).forEach(k=>{
 
@@ -234,29 +524,29 @@ localStorage.setItem(k,d[k]);
 
 });
 
-
 localStorage.setItem("phone",p);
 localStorage.setItem("password",pw);
-
-
 
 my_money.textContent=d.my_money||0;
 total_money.textContent=d.total_money||0;
 gifts.textContent=d.gifts||0;
 
+login.classList.add("hidden");
+dash.classList.remove("hidden");
 
+}
 
-document.getElementById("login").classList.add("hidden");
+catch(e){
 
-document.getElementById("dash").classList.remove("hidden");
+msg.textContent=e.message;
 
+}
 
 }
 
 
 
 async function recharge(){
-
 
 if(!logged()){
 
@@ -266,18 +556,18 @@ return;
 
 }
 
+rechargeBtn.disabled=true;
 
+result.style.display="flex";
 
-let btn=document.getElementById("rechargeBtn");
+resultTitle.textContent="جاري الشحن";
 
-btn.disabled=true;
-
-btn.textContent="جاري المعالجة...";
-
-
+resultText.innerHTML=`
+<div class="loader"></div>
+يرجى الانتظار...
+`;
 
 try{
-
 
 let r=await fetch("/api/recharge",{
 
@@ -287,89 +577,78 @@ headers:{
 "Content-Type":"application/json"
 },
 
-
 body:JSON.stringify({
 
 phone:localStorage.getItem("phone"),
 
 password:localStorage.getItem("password"),
 
-
-// حساب البنك المخزن
-
 num:localStorage.getItem("phone"),
 
 current_pin:localStorage.getItem("password"),
 
+target:target.value.trim(),
 
-
-// الرقم المراد شحنه
-
-target:
-document.getElementById("target").value.trim(),
-
-
-// العرض
-
-offer:
-document.getElementById("offer").value
-
+offer:offer.value
 
 })
 
 });
 
-
-
 let d=await r.json();
-
-
-
-result.style.display="flex";
-
 
 if(d.status=="success"){
 
 resultTitle.textContent="تمت العملية";
 
-resultText.textContent=
-"تم إرسال طلب الشحن بنجاح";
+resultText.innerHTML="تم إرسال طلب الشحن بنجاح.";
+
+if(d.my_money)
+my_money.textContent=d.my_money;
+
+if(d.total_money)
+total_money.textContent=d.total_money;
+
+if(d.gifts)
+gifts.textContent=d.gifts;
 
 }else{
 
 resultTitle.textContent="فشل العملية";
 
-resultText.textContent=
-d.message || "حدث خطأ";
-
+resultText.innerHTML=d.message||"حدث خطأ";
 
 }
-
-
 
 }
 
 catch(e){
 
-
-result.style.display="flex";
-
 resultTitle.textContent="خطأ";
 
-resultText.textContent=e.message;
+resultText.innerHTML=e.message;
 
+}
+
+rechargeBtn.disabled=false;
 
 }
 
 
-btn.disabled=false;
 
-btn.textContent="شحن";
+window.onload=()=>{
 
+if(logged()){
+
+phone.value=localStorage.getItem("phone");
+
+password.value=localStorage.getItem("password");
+
+login();
 
 }
 
-
+};
 
 </script>
 
