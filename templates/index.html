@@ -340,6 +340,19 @@ text-align:center;
 color:#ffb4b4;
 
 }
+.service{
+text-align:center;
+margin-bottom:15px;
+}
+
+#statusDot{
+display:inline-block;
+width:12px;
+height:12px;
+border-radius:50%;
+background:red;
+margin-left:8px;
+}
 
 </style>
 
@@ -366,6 +379,10 @@ color:#ffb4b4;
 </div>
 
 <div id="dash" class="hidden">
+<div class="service">
+<span id="statusDot"></span>
+<span id="statusText">جاري الفحص...</span>
+</div>
 
 <div class="stats">
 
@@ -382,6 +399,10 @@ color:#ffb4b4;
 <div class="card" style="grid-column:1/3">
 <div>الهدايا</div>
 <div id="gifts">0</div>
+</div>
+<div class="card" style="grid-column:1/3">
+<div>المستحقات</div>
+<div id="debts">0</div>
 </div>
 
 </div>
@@ -518,6 +539,7 @@ localStorage.setItem("password",password);
 document.getElementById("my_money").textContent=d.my_money||0;
 document.getElementById("total_money").textContent=d.total_money||0;
 document.getElementById("gifts").textContent=d.gifts||0;
+document.getElementById("debts").textContent=d.debts||0;
 
 document.getElementById("login").classList.add("hidden");
 document.getElementById("dash").classList.remove("hidden");
@@ -642,9 +664,38 @@ doLogin();
 }
 
 };
+async function checkService(){
+
+let r=await fetch("/check-service");
+
+let d=await r.json();
+
+let dot=document.getElementById("statusDot");
+let text=document.getElementById("statusText");
+
+
+if(d.available){
+
+dot.style.background="lime";
+text.textContent="الشحن متوفر";
+
+}else{
+
+dot.style.background="red";
+text.textContent="الشحن غير متوفر مؤقتا";
+
+}
+
+}
+
+
+checkService();
+
+setInterval(checkService,60000);
 
 </script>
 
 </body>
 </html>
+
 
