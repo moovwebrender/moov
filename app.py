@@ -347,7 +347,7 @@ async def recharge():
 
 
         # فشل إرسال الرصيد
-        if response.get("seccess") != True:
+        if response.get("status") != success:
 
             return jsonify({
                 "status":"failed",
