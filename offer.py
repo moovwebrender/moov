@@ -115,13 +115,21 @@ response = requests.post(
     timeout=30
 )
 
-if response.status_code == 200:
-    print(json.dumps({
-        "status": "success"
-    }))
-else:
+try:
+    result = response.json()
+
+    if result.get("seccess") == True:
+        print(json.dumps({
+            "status": "success"
+        }))
+    else:
+        print(json.dumps({
+            "status": "fail",
+            "response": result
+        }))
+
+except Exception:
     print(json.dumps({
         "status": "fail",
-        "code": response.status_code,
         "response": response.text
     }))
