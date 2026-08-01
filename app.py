@@ -508,7 +508,7 @@ def check_service():
     try:
 
         r = httpx.get(
-            "https://mymoov.moov-mauritel.mr",
+            "http://mymoov.moov-mauritel.mr",
             timeout=5
         )
 
