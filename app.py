@@ -502,33 +502,38 @@ async def recharge():
             "message":str(e)
         })
 @app.route("/check-service")
+@app.route("/check-service")
 def check_service():
-
-    import time
 
     try:
 
-        start=time.time()
-
-        httpx.get(
+        r = httpx.get(
             "https://mymoov.moov-mauritel.mr",
             timeout=5
         )
 
-        if time.time()-start < 5:
 
-            return jsonify({
-                "available":True
-            })
+        if r.status_code == 200:
+
+            data = r.json()
+
+            if "_links" in data:
+
+                return jsonify({
+                    "available": True
+                })
 
 
-    except:
-        pass
+        return jsonify({
+            "available": False
+        })
 
 
-    return jsonify({
-        "available":False
-    })
+    except Exception:
+
+        return jsonify({
+            "available": False
+        })
 
 if __name__ == "__main__":
     import os
