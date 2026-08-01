@@ -118,7 +118,7 @@ response = requests.post(
 try:
     result = response.json()
 
-    if result.get("seccess") == True:
+    if result.get("seccess") is True:
         print(json.dumps({
             "status": "success"
         }))
