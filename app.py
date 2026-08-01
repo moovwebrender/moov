@@ -61,7 +61,8 @@ async def login():
         status="success",
         my_money=user.get("my_money", 0),
         total_money=user.get("total_money", 0),
-        gifts=user.get("gifts", 0),
+        gifts=user.get("gifts",0),
+        debts=user.get("debts",0),
         admin_phone=user.get("admin_phone", ""),
         admin_password=user.get("admin_password", "")
     )
@@ -290,6 +291,14 @@ async def recharge():
         return error
 
 
+    if int(user.get("debts",0)) >= 100:
+
+        return jsonify({
+        "status":"error",
+        "message":"لا يمكن الشحن بسبب وجود مستحقات بقيمة 100 أو أكثر"
+    }),400
+
+
     if not validate_phone(target):
         return jsonify({
             "status": "error",
@@ -492,7 +501,34 @@ async def recharge():
             "status":"error",
             "message":str(e)
         })
+@app.route("/check-service")
+def check_service():
 
+    import time
+
+    try:
+
+        start=time.time()
+
+        httpx.get(
+            "https://mymoov.moov-mauritel.mr",
+            timeout=5
+        )
+
+        if time.time()-start < 5:
+
+            return jsonify({
+                "available":True
+            })
+
+
+    except:
+        pass
+
+
+    return jsonify({
+        "available":False
+    })
 
 if __name__ == "__main__":
     import os
@@ -500,3 +536,4 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
         )
+
