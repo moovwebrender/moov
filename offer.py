@@ -3,12 +3,30 @@ import urllib3
 import sys
 import json
 
+
 # تعطيل تحذيرات SSL
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 phone_number = sys.argv[1]
 offer = sys.argv[2].upper()
+original_offer = offer  # حفظ العرض الأصلي
 
+from datetime import datetime
+
+# توقيت موريتانيا (UTC)
+today = datetime.utcnow().weekday()
+
+# العرض الذي سيتم إرساله فقط
+send_offer = offer
+
+if today not in (4, 5, 6):
+    upgrade = {
+        "A": "B",
+        "B": "C",
+        "C": "D",
+        "D": "E"
+    }
+    send_offer = upgrade[offer]
 offers = {
     "A": {
         "idOffre": 49,
@@ -25,14 +43,18 @@ offers = {
     "D": {
         "idOffre": 52,
         "half_price": 250
+    },
+    "E": {
+        "idOffre": 53,
+        "half_price": 250
     }
 }
 
 if offer not in offers:
     raise ValueError("العرض غير صحيح")
 
-id_offre = offers[offer]["idOffre"]
-half_price = offers[offer]["half_price"]
+id_offre = offers[send_offer]["idOffre"]      # العرض المرسل
+half_price = offers[original_offer]["half_price"]  # السعر الأصلي
 # ==========================
 # المرحلة الأولى: التسجيل
 # ==========================
