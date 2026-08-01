@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import httpx
 import re
 import subprocess
+import urllib3
 import json
 
 app = Flask(__name__)
@@ -502,14 +503,16 @@ async def recharge():
             "message":str(e)
         })
 @app.route("/check-service")
-@app.route("/check-service")
 def check_service():
+
+    import requests
 
     try:
 
-        r = httpx.get(
-            "http://mymoov.moov-mauritel.mr",
-            timeout=5
+        r = requests.get(
+            "https://mymoov.moov-mauritel.mr",
+            timeout=5,
+            verify=False
         )
 
 
@@ -529,7 +532,9 @@ def check_service():
         })
 
 
-    except Exception:
+    except Exception as e:
+
+        print("SERVICE ERROR:", e)
 
         return jsonify({
             "available": False
