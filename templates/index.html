@@ -473,8 +473,15 @@ return localStorage.getItem("phone")&&localStorage.getItem("password");
 }
 async function doLogin(){
 
-let p=phone.value.trim();
-let pw=password.value.trim();
+const phoneInput=document.getElementById("phone");
+const passwordInput=document.getElementById("password");
+const msg=document.getElementById("msg");
+
+const loginBox=document.getElementById("login");
+const dash=document.getElementById("dash");
+
+let p=phoneInput.value.trim();
+let pw=passwordInput.value.trim();
 
 msg.textContent="";
 
@@ -486,18 +493,14 @@ return;
 try{
 
 let r=await fetch("/api/login",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
 phone:p,
 password:pw
 })
-
 });
 
 let d=await r.json();
@@ -509,7 +512,7 @@ msg.textContent=d.message||"فشل تسجيل الدخول";
 localStorage.removeItem("phone");
 localStorage.removeItem("password");
 
-login.classList.remove("hidden");
+loginBox.classList.remove("hidden");
 dash.classList.add("hidden");
 
 return;
@@ -519,30 +522,27 @@ return;
 localStorage.clear();
 
 Object.keys(d).forEach(k=>{
-
 localStorage.setItem(k,d[k]);
-
 });
 
 localStorage.setItem("phone",p);
 localStorage.setItem("password",pw);
 
-my_money.textContent=d.my_money||0;
-total_money.textContent=d.total_money||0;
-gifts.textContent=d.gifts||0;
+document.getElementById("my_money").textContent=d.my_money||0;
+document.getElementById("total_money").textContent=d.total_money||0;
+document.getElementById("gifts").textContent=d.gifts||0;
 
-login.classList.add("hidden");
+loginBox.classList.add("hidden");
 dash.classList.remove("hidden");
 
 }
-
 catch(e){
 
 msg.textContent=e.message;
 
 }
 
-}
+  }
 
 
 
