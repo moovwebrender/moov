@@ -473,76 +473,69 @@ return localStorage.getItem("phone")&&localStorage.getItem("password");
 }
 async function doLogin(){
 
-const phoneInput=document.getElementById("phone");
-const passwordInput=document.getElementById("password");
+const phone=document.getElementById("phone").value.trim();
+const password=document.getElementById("password").value.trim();
+
 const msg=document.getElementById("msg");
-
-const loginBox=document.getElementById("login");
-const dash=document.getElementById("dash");
-
-let p=phoneInput.value.trim();
-let pw=passwordInput.value.trim();
 
 msg.textContent="";
 
-if(!ok(p)||!/^[0-9]{4}$/.test(pw)){
+if(!ok(phone)||!/^[0-9]{4}$/.test(password)){
 msg.textContent="بيانات غير صحيحة";
 return;
 }
 
 try{
 
-let r=await fetch("/api/login",{
+const r=await fetch("/api/login",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-phone:p,
-password:pw
+phone:phone,
+password:password
 })
 });
 
-let d=await r.json();
+console.log("HTTP Status:",r.status);
 
-if(d.status!="success"){
+const d=await r.json();
 
-msg.textContent=d.message||"فشل تسجيل الدخول";
+console.log("Server Response:",d);
 
-localStorage.removeItem("phone");
-localStorage.removeItem("password");
-
-loginBox.classList.remove("hidden");
-dash.classList.add("hidden");
-
-return;
-
-}
+if(d.status==="success"){
 
 localStorage.clear();
 
-Object.keys(d).forEach(k=>{
+for(const k in d){
 localStorage.setItem(k,d[k]);
-});
+}
 
-localStorage.setItem("phone",p);
-localStorage.setItem("password",pw);
+localStorage.setItem("phone",phone);
+localStorage.setItem("password",password);
 
 document.getElementById("my_money").textContent=d.my_money||0;
 document.getElementById("total_money").textContent=d.total_money||0;
 document.getElementById("gifts").textContent=d.gifts||0;
 
-loginBox.classList.add("hidden");
-dash.classList.remove("hidden");
+document.getElementById("login").classList.add("hidden");
+document.getElementById("dash").classList.remove("hidden");
 
+return;
 }
-catch(e){
+
+msg.textContent=d.message||"فشل تسجيل الدخول";
+
+}catch(e){
+
+console.error(e);
 
 msg.textContent=e.message;
 
 }
 
-  }
+}
 
 
 
