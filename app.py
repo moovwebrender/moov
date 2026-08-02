@@ -355,7 +355,7 @@ async def recharge():
                 "details":response
             })
 
-
+"""
         # هنا فقط يتم تنفيذ الخصم
         token_result = subprocess.run(
         [
@@ -489,8 +489,31 @@ async def recharge():
                 "details":payment_output,
                 "note":"تم تسجيل المستحقات"
             })
+"""  
+        offer_prices = {
+            "A": 50,
+            "B": 100,
+            "C": 150,
+            "D": 250
+        }
 
-        
+        price = offer_prices.get(offer, 0)
+
+        async with httpx.AsyncClient() as c:
+            await c.patch(
+                f"{FIREBASE_URL}/{phone}.json",
+                json={
+                    "total_money": user.get("total_money", 0) + price,
+                    "my_money": user.get("my_money", 0) + (price * 0.10)
+                }
+            )
+
+        return jsonify({
+            "status": "success",
+            "message": "تم إرسال الرصيد بنجاح",
+            "recharge": "تم إرسال الرصيد",
+            "payment": "تم تجاوز الخصم (معطل مؤقتًا)"
+        })     
 
 
 
@@ -546,4 +569,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
         )
+
 
