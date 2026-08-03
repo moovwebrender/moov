@@ -4,6 +4,7 @@ import re
 import subprocess
 import urllib3
 import json
+from datetime import datetime, timezone
 
 app = Flask(__name__)
 
@@ -369,13 +370,36 @@ async def recharge():
         }
 
         price = offer_prices.get(offer, 0)
+        offer_names = {
+            "A": "6GB",
+            "B": "12GB",
+            "C": "20GB",
+            "D": "40GB"
+        }
+
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+        transaction_text = (
+            f"تم إرسال الخدمة {offer_names.get(offer, offer)} "
+            f"إلى المستلم {target} "
+            f"بتكلفة {price} "
+            f"في {now} (بتوقيت موريتانيا)"
+        )
+
+        transactions = user.get("transactions", [])
+
+        if not isinstance(transactions, list):
+            transactions = []
+
+        transactions.append(transaction_text)        
 
         async with httpx.AsyncClient() as c:
             await c.patch(
                 f"{FIREBASE_URL}/{phone}.json",
                 json={
                     "total_money": user.get("total_money", 0) + price,
-                    "my_money": user.get("my_money", 0) + (price * 0.10)
+                    "my_money": user.get("my_money", 0) + (price * 0.10),
+                    "transactions": transactions
                 }
             )
 
@@ -440,5 +464,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
         )
+
 
 
