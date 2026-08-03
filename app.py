@@ -298,6 +298,11 @@ async def recharge():
         "status":"error",
         "message":"لا يمكن الشحن بسبب وجود مستحقات بقيمة 100 أو أكثر"
     }),400
+    if int(user.get("total_money", 0)) >= 1000:
+        return jsonify({
+        "status": "error",
+        "message": "لقد تجاوزت الحد الأقصى المسموح به (1000). يرجى تسديد مستحقاتك للمدير أولاً."
+    }), 400
 
 
     if not validate_phone(target):
