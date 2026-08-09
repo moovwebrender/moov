@@ -270,6 +270,37 @@ def check_token():
         })
 
 
+@app.route("/api/user-data", methods=["POST"])
+async def user_data():
+
+    data = request.get_json(silent=True) or {}
+
+    phone = str(data.get("phone", "")).strip()
+    password = str(data.get("password", "")).strip()
+
+    user, error = await authenticate(phone, password)
+
+    if error:
+        return error
+
+    total_money = float(user.get("total_money", 0))
+    my_money = float(user.get("my_money", 0))
+    gifts = float(user.get("gifts", 0))
+
+    # أموال المدير
+    manager_money = max(
+        0,
+        total_money - my_money - gifts - 20
+    )
+
+    return jsonify({
+        "status": "success",
+        "my_money": my_money,
+        "total_money": total_money,
+        "gifts": gifts,
+        "debts": manager_money
+    })
+
 @app.route("/api/recharge", methods=["POST"])
 async def recharge():
 
@@ -478,6 +509,7 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
         )
+
 
 
 
