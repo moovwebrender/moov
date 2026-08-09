@@ -618,14 +618,22 @@ resultTitle.textContent="تمت العملية";
 
 resultText.innerHTML="تم الشحن بنجاح.";
 
-if(d.my_money)
-my_money.textContent=d.my_money;
+if(d.status=="success"){
 
-if(d.total_money)
-total_money.textContent=d.total_money;
+    resultTitle.textContent="تمت العملية";
 
-if(d.gifts)
-gifts.textContent=d.gifts;
+    resultText.innerHTML="تم الشحن بنجاح.";
+
+    // 🔄 جلب القيم الجديدة مباشرة من السيرفر
+    await refreshUserData();
+
+}else{
+
+    resultTitle.textContent="فشل العملية";
+
+    resultText.innerHTML=d.message||"حدث خطأ";
+
+}
 
 }else{
 
@@ -651,17 +659,20 @@ rechargeBtn.disabled=false;
 
 
 
-window.onload=()=>{
+window.onload=async()=>{
 
-if(logged()){
+    if(logged()){
 
-phone.value=localStorage.getItem("phone");
+        phone.value=localStorage.getItem("phone");
+        password.value=localStorage.getItem("password");
 
-password.value=localStorage.getItem("password");
+        // تسجيل الدخول وعرض الواجهة
+        await doLogin();
 
-doLogin();
+        // 🔄 التأكد من أن القيم المعروضة هي آخر قيم من Firebase
+        await refreshUserData();
 
-}
+    }
 
 };
 async function checkService(){
@@ -715,10 +726,64 @@ function updateOffersByDay() {
 }
 
 updateOffersByDay();
+async function refreshUserData(){
+
+    if(!logged()){
+        return false;
+    }
+
+    try{
+
+        const r = await fetch("/api/user-data",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                phone:localStorage.getItem("phone"),
+                password:localStorage.getItem("password")
+            })
+        });
+
+        const d = await r.json();
+
+        if(d.status !== "success"){
+            console.error("فشل تحديث البيانات:",d);
+            return false;
+        }
+
+        document.getElementById("my_money").textContent =
+            d.my_money ?? 0;
+
+        document.getElementById("total_money").textContent =
+            d.total_money ?? 0;
+
+        document.getElementById("gifts").textContent =
+            d.gifts ?? 0;
+
+        document.getElementById("debts").textContent =
+            d.debts ?? 0;
+
+        // تحديث التخزين المحلي أيضاً
+        localStorage.setItem("my_money",d.my_money ?? 0);
+        localStorage.setItem("total_money",d.total_money ?? 0);
+        localStorage.setItem("gifts",d.gifts ?? 0);
+        localStorage.setItem("debts",d.debts ?? 0);
+
+        return true;
+
+    }catch(e){
+
+        console.error("خطأ في تحديث البيانات:",e);
+        return false;
+
+    }
+}
 
 </script>
 
 </body>
 </html>
+
 
 
