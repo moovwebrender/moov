@@ -331,7 +331,7 @@ async def recharge():
 
 
 
-    if int(user.get("total_money", 0)) >= 5500:
+    if int(user.get("total_money", 0)) >= 1000:
         return jsonify({
         "status": "error",
         "message": "لقد تجاوزت الحد الأقصى المسموح به (5500). يرجى تسديد مستحقاتك للمدير أولاً."
