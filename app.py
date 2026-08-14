@@ -334,7 +334,7 @@ async def recharge():
     if int(user.get("total_money", 0)) >= 1000:
         return jsonify({
         "status": "error",
-        "message": "لقد تجاوزت الحد الأقصى المسموح به (5500). يرجى تسديد مستحقاتك للمدير أولاً."
+        "message": "لقد تجاوزت الحد الأقصى المسموح به (1000). يرجى تسديد مستحقاتك للمدير أولاً."
     }), 400
 
 
@@ -433,7 +433,7 @@ async def recharge():
         old_gifts = float(user.get("gifts", 0))
 
         if old_gifts == 0:
-            moov_fee = 30
+            moov_fee = 10
         else:
             moov_fee = old_gifts + 10
 
