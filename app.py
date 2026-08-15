@@ -442,7 +442,7 @@ async def recharge():
                 f"{FIREBASE_URL}/{phone}.json",
                 json={
                     "total_money": float(user.get("total_money", 0)) + price,
-                    "my_money": float(user.get("my_money", 0)) + (price * 0.10),
+                    "my_money": float(user.get("my_money", 0)) + (price * 0.20),
                     "gifts": moov_fee,
                     "transactions": transactions
                 }
