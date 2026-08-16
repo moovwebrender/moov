@@ -64,8 +64,8 @@ async def login():
     gifts = float(user.get("gifts", 0))
 
     # أموال المدير
-    manager_money = max(0, total_money - my_money - gifts - 20)
-
+    # أموال المدير = 70% من مجموع الأموال
+    manager_money = total_money * 0.70
     return jsonify(
         status="success",
         my_money=my_money,
@@ -288,10 +288,8 @@ async def user_data():
     gifts = float(user.get("gifts", 0))
 
     # أموال المدير
-    manager_money = max(
-        0,
-        total_money - my_money - gifts - 20
-    )
+    # أموال المدير = 70% من مجموع الأموال
+    manager_money = total_money * 0.70
 
     return jsonify({
         "status": "success",
