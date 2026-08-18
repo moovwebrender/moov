@@ -463,6 +463,60 @@ async def recharge():
             "status":"error",
             "message":str(e)
         })
+@app.route("/api/transactions", methods=["POST"])
+async def get_transactions():
+
+    data = request.get_json(silent=True) or {}
+
+    phone = str(
+        data.get("phone", "")
+    ).strip()
+
+    password = str(
+        data.get("password", "")
+    ).strip()
+
+
+    # ==========================================
+    # التحقق من المستخدم
+    # ==========================================
+
+    user, error = await authenticate(
+        phone,
+        password
+    )
+
+    if error:
+        return error
+
+
+    transactions = user.get(
+        "transactions",
+        []
+    )
+
+
+    if not isinstance(transactions, list):
+        transactions = []
+
+
+    # ==========================================
+    # الأحدث أولاً
+    # ==========================================
+
+    transactions = list(
+        reversed(transactions)
+    )
+
+
+    return jsonify({
+
+        "status": "success",
+
+        "transactions": transactions
+
+    })        
+        
 @app.route("/check-service")
 def check_service():
 
@@ -507,6 +561,7 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000))
         )
+
 
 
 
