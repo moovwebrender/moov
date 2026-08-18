@@ -353,7 +353,262 @@ border-radius:50%;
 background:red;
 margin-left:8px;
 }
+/* =========================
+   زر المعاملات
+========================= */
 
+.transactionsBtn{
+    margin-top:12px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+    color:#fff;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.transactionsBtn:hover{
+    background:rgba(0,188,212,.22);
+    border-color:rgba(0,188,212,.4);
+}
+
+.transactionsBtn:active{
+    transform:scale(.97);
+}
+
+
+/* =========================
+   نافذة المعاملات
+========================= */
+
+.transactionsModal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:1000;
+
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+
+    background:rgba(0,0,0,.52);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+}
+
+.transactionsWindow{
+    width:100%;
+    max-width:430px;
+    max-height:85vh;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:20px;
+
+    background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,255,255,.16);
+
+    border-radius:26px;
+
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+
+    box-shadow:0 25px 60px rgba(0,0,0,.45);
+
+    animation:show .3s;
+}
+
+.transactionsHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:15px;
+}
+
+.transactionsHeader h3{
+    font-weight:normal;
+    font-size:20px;
+}
+
+.closeTransactions{
+    width:36px;
+    height:36px;
+
+    padding:0;
+    margin:0;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.10);
+    color:#fff;
+
+    font-size:21px;
+    cursor:pointer;
+}
+
+.closeTransactions:hover{
+    background:rgba(255,255,255,.18);
+}
+
+
+/* =========================
+   منطقة التمرير
+========================= */
+
+.transactionsList{
+    overflow-y:auto;
+    padding:3px 3px 10px;
+
+    max-height:65vh;
+
+    scroll-behavior:smooth;
+
+    scrollbar-width:thin;
+    scrollbar-color:rgba(0,188,212,.6) transparent;
+}
+
+.transactionsList::-webkit-scrollbar{
+    width:5px;
+}
+
+.transactionsList::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.transactionsList::-webkit-scrollbar-thumb{
+    background:rgba(0,188,212,.55);
+    border-radius:20px;
+}
+
+
+/* =========================
+   بطاقة المعاملة
+========================= */
+
+.transactionCard{
+    background:rgba(255,255,255,.075);
+
+    border:1px solid rgba(255,255,255,.11);
+
+    border-radius:19px;
+
+    padding:15px;
+
+    margin-bottom:11px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.12);
+
+    animation:transactionShow .3s;
+}
+
+@keyframes transactionShow{
+
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+.transactionTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:12px;
+}
+
+.transactionService{
+    font-size:17px;
+    font-weight:bold;
+
+    color:#fff;
+}
+
+.transactionGB{
+    padding:5px 10px;
+
+    border-radius:12px;
+
+    background:rgba(0,188,212,.18);
+
+    border:1px solid rgba(0,188,212,.25);
+
+    color:#6eeaff;
+
+    font-size:14px;
+}
+
+.transactionRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:10px;
+
+    padding:7px 0;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+    font-size:13px;
+}
+
+.transactionRow:last-child{
+    border-bottom:none;
+}
+
+.transactionLabel{
+    opacity:.65;
+}
+
+.transactionValue{
+    text-align:left;
+    word-break:break-word;
+}
+
+.transactionDate{
+    margin-top:10px;
+
+    text-align:center;
+
+    font-size:11px;
+
+    opacity:.55;
+}
+
+.noTransactions{
+    text-align:center;
+    padding:40px 15px;
+
+    opacity:.7;
+}
+
+.transactionLoader{
+    width:40px;
+    height:40px;
+
+    margin:25px auto 15px;
+
+    border:3px solid rgba(255,255,255,.15);
+    border-top:3px solid #00d4ff;
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+}
+
+.transactionsError{
+    text-align:center;
+    color:#ffb4b4;
+    padding:25px 10px;
+}
 </style>
 
 </head>
@@ -455,6 +710,13 @@ onclick="recharge()">
 الهدايا غير متاحة حاليا
 
 </button>
+<button
+    class="transactionsBtn"
+    onclick="openTransactions()">
+
+    📋 معاملاتي
+
+</button>
 
 </div>
 
@@ -480,6 +742,37 @@ onclick="result.style.display='none'">
 </button>
 
 </div>
+
+</div>
+<!-- =========================
+     نافذة المعاملات
+========================= -->
+
+<div id="transactionsModal" class="transactionsModal">
+
+    <div class="transactionsWindow">
+
+        <div class="transactionsHeader">
+
+            <h3>📋 معاملاتي</h3>
+
+            <button
+                class="closeTransactions"
+                onclick="closeTransactions()">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <div
+            id="transactionsList"
+            class="transactionsList">
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -780,10 +1073,446 @@ async function refreshUserData(){
     }
 }
 
+// ============================================================
+//              نظام عرض المعاملات
+// ============================================================
+
+function getOfferDisplay(offer){
+
+    // موريتانيا = UTC
+    const day = new Date().getUTCDay();
+
+    // الجمعة، السبت، الأحد
+    const weekend =
+        day === 5 ||
+        day === 6 ||
+        day === 0;
+
+    const names = {
+
+        A: "6GB",
+
+        B: weekend
+            ? "12GB"
+            : "10GB",
+
+        C: "20GB",
+
+        D: weekend
+            ? "40GB"
+            : "45GB"
+
+    };
+
+    return names[offer] || offer;
+}
+
+
+// ============================================================
+// استخراج بيانات المعاملة القديمة
+// ============================================================
+
+function parseOldTransaction(text){
+
+    text = String(text || "");
+
+    let offer = null;
+    let target = "غير معروف";
+    let price = "غير معروف";
+    let date = "";
+
+    // اكتشاف الخدمة
+    if(text.includes("6GB")){
+        offer = "A";
+    }
+    else if(text.includes("12GB") || text.includes("10GB")){
+        offer = "B";
+    }
+    else if(text.includes("20GB")){
+        offer = "C";
+    }
+    else if(text.includes("40GB") || text.includes("45GB")){
+        offer = "D";
+    }
+
+    // استخراج رقم المستلم
+    const targetMatch =
+        text.match(/المستلم\s+([234]\d{7})/);
+
+    if(targetMatch){
+        target = targetMatch[1];
+    }
+
+    // استخراج السعر
+    const priceMatch =
+        text.match(/بتكلفة\s+([\d.]+)/);
+
+    if(priceMatch){
+        price = priceMatch[1];
+    }
+
+    // استخراج التاريخ
+    const dateMatch =
+        text.match(/في\s+(.+?)\s+\(بتوقيت موريتانيا\)/);
+
+    if(dateMatch){
+        date = dateMatch[1];
+    }
+
+    return {
+        offer,
+        target,
+        price,
+        date
+    };
+}
+
+
+// ============================================================
+// فتح نافذة المعاملات
+// ============================================================
+
+async function openTransactions(){
+
+    if(!logged()){
+
+        alert("يجب تسجيل الدخول");
+
+        return;
+    }
+
+    const modal =
+        document.getElementById("transactionsModal");
+
+    const list =
+        document.getElementById("transactionsList");
+
+    modal.style.display="flex";
+
+    list.innerHTML=`
+        <div class="transactionLoader"></div>
+        <div style="text-align:center;opacity:.7">
+            جاري تحميل المعاملات...
+        </div>
+    `;
+
+    try{
+
+        const r = await fetch("/api/transactions",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                phone:
+                    localStorage.getItem("phone"),
+
+                password:
+                    localStorage.getItem("password")
+
+            })
+
+        });
+
+
+        const d = await r.json();
+
+
+        if(d.status !== "success"){
+
+            list.innerHTML=`
+                <div class="transactionsError">
+                    ${escapeHTML(
+                        d.message ||
+                        "تعذر تحميل المعاملات"
+                    )}
+                </div>
+            `;
+
+            return;
+        }
+
+
+        const transactions =
+            Array.isArray(d.transactions)
+            ? d.transactions
+            : [];
+
+
+        if(transactions.length === 0){
+
+            list.innerHTML=`
+                <div class="noTransactions">
+
+                    📭
+
+                    <br><br>
+
+                    لا توجد معاملات حتى الآن
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        list.innerHTML="";
+
+
+        /*
+         * السيرفر يعيد الأحدث أولاً،
+         * لذلك نعرضها بنفس الترتيب.
+         */
+
+        transactions.forEach((transaction,index)=>{
+
+            const card =
+                createTransactionCard(
+                    transaction,
+                    index
+                );
+
+            list.appendChild(card);
+
+        });
+
+
+    }catch(e){
+
+        console.error(
+            "TRANSACTIONS ERROR:",
+            e
+        );
+
+        list.innerHTML=`
+            <div class="transactionsError">
+
+                حدث خطأ أثناء تحميل المعاملات
+
+                <br><br>
+
+                ${escapeHTML(e.message)}
+
+            </div>
+        `;
+    }
+}
+
+
+// ============================================================
+// إنشاء بطاقة معاملة
+// ============================================================
+
+function createTransactionCard(transaction,index){
+
+    let offer = null;
+    let target = "غير معروف";
+    let price = "غير معروف";
+    let date = "";
+    let type = "شحن";
+
+
+    // ==========================================
+    // المعاملات الجديدة: Object
+    // ==========================================
+
+    if(
+        typeof transaction === "object" &&
+        transaction !== null
+    ){
+
+        offer =
+            transaction.offer ||
+            transaction.service ||
+            null;
+
+        target =
+            transaction.target ||
+            transaction.receiver ||
+            "غير معروف";
+
+        price =
+            transaction.price ??
+            "غير معروف";
+
+        date =
+            transaction.date ||
+            transaction.timestamp ||
+            "";
+
+        type =
+            transaction.type ||
+            "شحن";
+
+    }
+
+    // ==========================================
+    // المعاملات القديمة: String
+    // ==========================================
+
+    else{
+
+        const old =
+            parseOldTransaction(transaction);
+
+        offer = old.offer;
+        target = old.target;
+        price = old.price;
+        date = old.date;
+
+    }
+
+
+    // ==========================================
+    // تصحيح كمية GB حسب اليوم الحالي
+    // ==========================================
+
+    const gb =
+        getOfferDisplay(offer);
+
+
+    const service =
+        offer
+        ? `خدمة ${gb}`
+        : "معاملة";
+
+
+    const card =
+        document.createElement("div");
+
+    card.className="transactionCard";
+
+
+    card.innerHTML=`
+
+        <div class="transactionTop">
+
+            <div class="transactionService">
+
+                ${escapeHTML(service)}
+
+            </div>
+
+            <div class="transactionGB">
+
+                ${escapeHTML(gb)}
+
+            </div>
+
+        </div>
+
+
+        <div class="transactionRow">
+
+            <span class="transactionLabel">
+                نوع العملية
+            </span>
+
+            <span class="transactionValue">
+                ${escapeHTML(type)}
+            </span>
+
+        </div>
+
+
+        <div class="transactionRow">
+
+            <span class="transactionLabel">
+                المستلم
+            </span>
+
+            <span class="transactionValue">
+                ${escapeHTML(target)}
+            </span>
+
+        </div>
+
+
+        <div class="transactionRow">
+
+            <span class="transactionLabel">
+                التكلفة
+            </span>
+
+            <span class="transactionValue">
+                ${escapeHTML(String(price))}
+            </span>
+
+        </div>
+
+
+        ${
+            date
+            ? `
+            <div class="transactionDate">
+
+                🕒 ${escapeHTML(date)}
+
+            </div>
+            `
+            : ""
+        }
+
+    `;
+
+
+    return card;
+}
+
+
+// ============================================================
+// حماية عرض النصوص القادمة من Firebase
+// ============================================================
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+// ============================================================
+// إغلاق نافذة المعاملات
+// ============================================================
+
+function closeTransactions(){
+
+    document.getElementById(
+        "transactionsModal"
+    ).style.display="none";
+
+}
+
+
+// ============================================================
+// إغلاق النافذة عند الضغط خارجها
+// ============================================================
+
+document.getElementById(
+    "transactionsModal"
+).addEventListener("click",function(e){
+
+    if(e.target === this){
+
+        closeTransactions();
+
+    }
+
+});
 </script>
 
 </body>
 </html>
+
 
 
 
