@@ -609,6 +609,11 @@ margin-left:8px;
     color:#ffb4b4;
     padding:25px 10px;
 }
+.transactionHighlight{
+    border-color:#00d4ff !important;
+    box-shadow:0 0 25px rgba(0,212,255,.55);
+    transform:scale(1.02);
+}
 </style>
 
 </head>
@@ -724,6 +729,13 @@ onclick="recharge()">
 </button>
 
 </div>
+
+<input
+    id="transactionSearch"
+    type="tel"
+    maxlength="8"
+    placeholder="🔎 ابحث برقم المستلم"
+    oninput="searchTransaction()">
 
 </div>
 
@@ -1513,6 +1525,57 @@ document.getElementById(
     }
 
 });
+
+function searchTransaction(){
+
+    const search =
+        document.getElementById("transactionSearch")
+        .value.trim();
+
+    const cards =
+        document.querySelectorAll(".transactionCard");
+
+    if(!search){
+        cards.forEach(card=>{
+            card.style.display="";
+            card.classList.remove("transactionHighlight");
+        });
+        return;
+    }
+
+    let found = null;
+
+    cards.forEach(card=>{
+
+        const text = card.textContent;
+
+        card.classList.remove("transactionHighlight");
+
+        if(text.includes(search)){
+            card.style.display="";
+            if(!found) found=card;
+        }else{
+            card.style.display="none";
+        }
+
+    });
+
+    if(found){
+
+        found.scrollIntoView({
+            behavior:"smooth",
+            block:"center"
+        });
+
+        found.classList.add("transactionHighlight");
+
+        setTimeout(()=>{
+            found.classList.remove("transactionHighlight");
+        },2000);
+
+    }
+
+}
 </script>
 
 </body>
